@@ -237,7 +237,9 @@ valid_commit_count <- function(username,reponame,wday,startHour,endHour){
 最後一行請打valid_commit_count。
 ```{r ans114}
 # valid_commit_count
-
+valid_commit_count <- function(username,reponame,wday,startHour,endHour){
+  commitHistory <- 
+}
 ```
 
 
