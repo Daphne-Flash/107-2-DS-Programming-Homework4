@@ -1,0 +1,106 @@
+"0","# valid_commit_count"
+"0","library(httr)"
+"0","library(stringr)"
+"0","valid_commit_count <- function(username,reponame,wday,startHour,endHour){"
+"0","  str_replace_all( "
+"0","    ""https://api.github.com/repos/r-hub/cranlogs/commits"","
+"0","  c("
+"0","    ""r-hub""=username,"
+"0","    ""cranlogs""=reponame"
+"0","    )) -> commitCheckStatement"
+"0","  commitHistory <- content(GET(commitCheckStatement))"
+"0","  library(purrr)"
+"0","df_allCommits <- map_dfr(commitHistory,commit_df_fun)"
+"0","df_allCommits"
+"0","df_allCommits$samePerson <- df_allCommits$author == df_allCommits$commiter"
+"0","df_allCommits$samePerson"
+"0","df_validCommits <- df_allCommits[df_allCommits$samePerson,]"
+"0","df_validCommits"
+"0","df_validCommits$commitDate <- ymd_hms(df_validCommits$commitDate)"
+"0","df_validCommits$commitDate <- with_tz(df_validCommits$commitDate,tzone=""Asia/Taipei"")"
+"0","df_validCommits$commitDate"
+"0","df_validCommits$hh <- hour(df_validCommits$commitDate)"
+"0","df_validCommits$hh"
+"0","df_validCommits$date <- date(df_validCommits$commitDate)"
+"0","df_validCommits$date"
+"0","df_validCommits$weekday <- as.integer(wday(df_validCommits$commitDate))"
+"0","df_validCommits$weekday"
+"0","logdate <- df_validCommits$weekday>=wday & df_validCommits$weekday<=wday"
+"0","loghour <- df_validCommits$hh>=startHour & df_validCommits$hh<=endHour"
+"0","df_validCommits$validCommit <- logdate & loghour"
+"0","df_validCommits$validCommit"
+"0","df_validCommitsSubsample <- df_validCommits[df_validCommits$validCommit,]"
+"0","df_validCommitsSubsample"
+"0","validCounts <- length(unique(df_validCommitsSubsample$date))"
+"0","validCounts"
+"0","return(validCounts)"
+"0","}"
+"0","valid_commit_count"
+"1","function(username,reponame,wday,startHour,endHour){
+"
+"1","  str_replace_all( 
+"
+"1","    ""https://api.github.com/repos/r-hub/cranlogs/commits"",
+"
+"1","  c(
+"
+"1","    ""r-hub""=username,
+"
+"1","    ""cranlogs""=reponame
+"
+"1","    )) -> commitCheckStatement
+"
+"1","  commitHistory <- content(GET(commitCheckStatement))
+"
+"1","  library(purrr)
+"
+"1","df_allCommits <- map_dfr(commitHistory,commit_df_fun)
+"
+"1","df_allCommits
+"
+"1","df_allCommits$samePerson <- df_allCommits$author == df_allCommits$commiter
+"
+"1","df_allCommits$samePerson
+"
+"1","df_validCommits <- df_allCommits[df_allCommits$samePerson,]
+"
+"1","df_validCommits
+"
+"1","df_validCommits$commitDate <- ymd_hms(df_validCommits$commitDate)
+"
+"1","df_validCommits$commitDate <- with_tz(df_validCommits$commitDate,tzone=""Asia/Taipei"")
+"
+"1","df_validCommits$commitDate
+"
+"1","df_validCommits$hh <- hour(df_validCommits$commitDate)
+"
+"1","df_validCommits$hh
+"
+"1","df_validCommits$date <- date(df_validCommits$commitDate)
+"
+"1","df_validCommits$date
+"
+"1","df_validCommits$weekday <- as.integer(wday(df_validCommits$commitDate))
+"
+"1","df_validCommits$weekday
+"
+"1","logdate <- df_validCommits$weekday>=wday & df_validCommits$weekday<=wday
+"
+"1","loghour <- df_validCommits$hh>=startHour & df_validCommits$hh<=endHour
+"
+"1","df_validCommits$validCommit <- logdate & loghour
+"
+"1","df_validCommits$validCommit
+"
+"1","df_validCommitsSubsample <- df_validCommits[df_validCommits$validCommit,]
+"
+"1","df_validCommitsSubsample
+"
+"1","validCounts <- length(unique(df_validCommitsSubsample$date))
+"
+"1","validCounts
+"
+"1","return(validCounts)
+"
+"1","}
+"

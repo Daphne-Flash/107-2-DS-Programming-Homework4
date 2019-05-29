@@ -237,9 +237,43 @@ valid_commit_count <- function(username,reponame,wday,startHour,endHour){
 最後一行請打valid_commit_count。
 ```{r ans114}
 # valid_commit_count
+library(httr)
+library(stringr)
 valid_commit_count <- function(username,reponame,wday,startHour,endHour){
-  commitHistory <- 
+  str_replace_all( 
+    "https://api.github.com/repos/r-hub/cranlogs/commits",
+  c(
+    "r-hub"=username,
+    "cranlogs"=reponame
+    )) -> commitCheckStatement
+  commitHistory <- content(GET(commitCheckStatement))
+  library(purrr)
+df_allCommits <- map_dfr(commitHistory,commit_df_fun)
+df_allCommits
+df_allCommits$samePerson <- df_allCommits$author == df_allCommits$commiter
+df_allCommits$samePerson
+df_validCommits <- df_allCommits[df_allCommits$samePerson,]
+df_validCommits
+df_validCommits$commitDate <- ymd_hms(df_validCommits$commitDate)
+df_validCommits$commitDate <- with_tz(df_validCommits$commitDate,tzone="Asia/Taipei")
+df_validCommits$commitDate
+df_validCommits$hh <- hour(df_validCommits$commitDate)
+df_validCommits$hh
+df_validCommits$date <- date(df_validCommits$commitDate)
+df_validCommits$date
+df_validCommits$weekday <- as.integer(wday(df_validCommits$commitDate))
+df_validCommits$weekday
+logdate <- df_validCommits$weekday>=wday & df_validCommits$weekday<=wday
+loghour <- df_validCommits$hh>=startHour & df_validCommits$hh<=endHour
+df_validCommits$validCommit <- logdate & loghour
+df_validCommits$validCommit
+df_validCommitsSubsample <- df_validCommits[df_validCommits$validCommit,]
+df_validCommitsSubsample
+validCounts <- length(unique(df_validCommitsSubsample$date))
+validCounts
+return(validCounts)
 }
+valid_commit_count
 ```
 
 
